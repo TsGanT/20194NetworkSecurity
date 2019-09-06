@@ -289,6 +289,10 @@ class EscapeRoomGame:
 
 
 def main(args):
+
+    def send_message(result):
+        s.send(result.encode('uft-8'))
+
     # Client test
     s = socket.socket()
     # connect the server
@@ -308,16 +312,14 @@ def main(args):
     game = EscapeRoomGame()
     game.create_game(cheat=("--cheat" in args))
     game.start()
+    game.output = send_message
     while game.status == "playing":
         res = s.recv(1024)
         command = res.decode('utf-8')
+        print(command)
         # command = input(">> ")
         output = game.command(command)
 
-    def send_message(result):
-        s.send(result.encode('uft-8'))
-
-    game.output = send_message
 
 
 if __name__ == "__main__":
