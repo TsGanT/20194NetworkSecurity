@@ -2,7 +2,8 @@
 Escape Room Core
 """
 import random, sys
-
+import socket
+import time
 
 def create_container_contents(*escape_room_objects):
     return {obj.name: obj for obj in escape_room_objects}
@@ -288,12 +289,35 @@ class EscapeRoomGame:
 
 
 def main(args):
+    # Client test
+    s = socket.socket()
+    # connect the server
+    s.connect(('192.168.200.52', 19002))  # ①
+    # Define the command list
+    command_list = ["Tianshi Feng", "look", "look chest", "look mirror", "get hairpin",
+                    "unlock chest with hairpin", "open chest", "look in chest", "unlock door with hairpin",
+                    "open door"]
+    for i in command_list:
+        res = s.recv(1024)
+        print(res.decode('utf-8'))
+        s.send(i.encode('utf-8'))
+        time.sleep(0.25)
+    res_suc = s.recv(1024)
+    print(res_suc.decode('utf-8'))
+    # Server test
     game = EscapeRoomGame()
     game.create_game(cheat=("--cheat" in args))
     game.start()
     while game.status == "playing":
-        command = input(">> ")
+        res = s.recv(1024)
+        command = res.decode('utf-8')
+        # command = input(">> ")
         output = game.command(command)
+
+    def send_message(result):
+        s.send(result.encode('uft-8'))
+
+    game.output = send_message
 
 
 if __name__ == "__main__":
