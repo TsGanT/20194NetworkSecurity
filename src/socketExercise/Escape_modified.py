@@ -302,8 +302,8 @@ def main(args):
                     "unlock chest with hairpin", "open chest", "look in chest", "unlock door with hairpin",
                     "open door"]
     for i in command_list:
-        res = s.recv(1024)
-        print(res.decode('utf-8'))
+        res2 = s.recv(1024)
+        print(res2.decode('utf-8'))
         s.send(i.encode('utf-8'))
         time.sleep(0.25)
     res_suc = s.recv(1024)
@@ -314,7 +314,9 @@ def main(args):
     game.start()
     game.output = send_message
     game.command_handler_class.output = send_message
+
     while game.status == "playing":
+        print("Go on")
         res = s.recv(1024)
         command = res.decode('utf-8')
         print(command)
