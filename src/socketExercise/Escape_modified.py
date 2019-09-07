@@ -313,6 +313,7 @@ def main(args):
     game.create_game(cheat=("--cheat" in args))
     game.start()
     game.output = send_message
+    game.command_handler_class.output=send_message
     while game.status == "playing":
         res = s.recv(1024)
         command = res.decode('utf-8')
