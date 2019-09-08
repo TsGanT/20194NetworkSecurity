@@ -319,8 +319,10 @@ def main(args):
         command = res.decode('utf-8').split("<EOL>\n")
         print(command)
         # command = input(">> ")
-        output = game.command(command)
-
+        for i in command:
+            output = game.command(i)
+        #  output = game.command(command)
+    s.close()
 
 if __name__ == "__main__":
     main(sys.argv[1:])
