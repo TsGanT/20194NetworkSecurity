@@ -5,12 +5,15 @@ import random, sys
 import socket
 import time
 
+
 def create_container_contents(*escape_room_objects):
     return {obj.name: obj for obj in escape_room_objects}
 
+
 def listFormat(object_list):
-    l = ["a "+object.name for object in object_list if object["visible"]]
+    l = ["a " + object.name for object in object_list if object["visible"]]
     return ", ".join(l)
+
 
 class EscapeRoomObject:
     def __init__(self, name, **attributes):
@@ -29,6 +32,7 @@ class EscapeRoomObject:
 
     def __repr__(self):
         return self.name
+
 
 class EscapeRoomCommandHandler:
     def __init__(self, room, player, output=print):
@@ -56,7 +60,7 @@ class EscapeRoomCommandHandler:
                 look_result = "Inside the {} you see: {}".format(object.name, listFormat(object["container"].values()))
         else:
             self._run_triggers(object, "look")
-            look_result = object.attributes.get("description","You see nothing special")
+            look_result = object.attributes.get("description", "You see nothing special")
         self.output(look_result)
 
     def _cmd_unlock(self, unlock_args):
@@ -106,11 +110,11 @@ class EscapeRoomCommandHandler:
 
         success_result = "You open the {}.".format(object.name)
         open_result = (
-            ((not object or not object["visible"]) and "You don't see that.") or
-            ((object["open"])                      and "It's already open!") or
-            ((object["locked"])                    and "It's locked") or
-            ((not object["openable"])              and "You can't open that!") or
-                                                       success_result)
+                ((not object or not object["visible"]) and "You don't see that.") or
+                ((object["open"]) and "It's already open!") or
+                ((object["locked"]) and "It's locked") or
+                ((not object["openable"]) and "You can't open that!") or
+                success_result)
         if open_result == success_result:
             object["open"] = True
             self._run_triggers(object, "open")
@@ -130,16 +134,16 @@ class EscapeRoomCommandHandler:
 
             success_result = "You got it"
             get_result = (
-                ((not container or container["container"] == False)and "You can't get something out of that!") or
-                ((container["openable"] and not container["open"]) and "It's not open.") or
-                ((not object or not object["visible"])             and "You don't see that") or
-                ((not object["gettable"])                          and "You can't get that.") or
-                                                                   success_result)
+                    ((not container or container["container"] == False) and "You can't get something out of that!") or
+                    ((container["openable"] and not container["open"]) and "It's not open.") or
+                    ((not object or not object["visible"]) and "You don't see that") or
+                    ((not object["gettable"]) and "You can't get that.") or
+                    success_result)
 
             if get_result == success_result:
                 container["container"].__delitem__(object.name)
                 self.player["container"][object.name] = object
-                self._run_triggers(object, "get",container)
+                self._run_triggers(object, "get", container)
         self.output(get_result)
 
     def _cmd_inventory(self, inventory_args):
@@ -150,7 +154,7 @@ class EscapeRoomCommandHandler:
             self.output("What?!")
             return
 
-        items = ", ".join(["a "+item for item in self.player["container"]])
+        items = ", ".join(["a " + item for item in self.player["container"]])
         self._run_triggers(object, "inventory")
         self.output("You are carrying {}".format(items))
 
@@ -160,7 +164,7 @@ class EscapeRoomCommandHandler:
             return self.output("")
 
         command_args = command_string.split(" ")
-        function = "_cmd_"+command_args[0]
+        function = "_cmd_" + command_args[0]
 
         # unknown command
         if not hasattr(self, function):
@@ -169,6 +173,7 @@ class EscapeRoomCommandHandler:
         # execute command dynamically
         getattr(self, function)(command_args[1:])
         self._run_triggers(self.room, "_post_command_", *command_args)
+
 
 def create_room_description(room):
     room_data = {
@@ -180,16 +185,19 @@ and it is locked. Above the door is a clock that reads {clock_time}.
 Across from the door is a large {mirror}. Below the mirror is an old chest.
 The room is old and musty and the floor is creaky and warped.""".format(**room_data)
 
+
 def create_door_description(door):
     description = "The door is strong and highly secured."
     if door["locked"]: description += " The door is locked."
     return description
+
 
 def create_mirror_description(mirror, room):
     description = "You look in the mirror and see yourself."
     if "hairpin" in room["container"]:
         description += ".. wait, there's a hairpin in your hair. Where did that come from?"
     return description
+
 
 def create_chest_description(chest):
     description = "An old chest. It looks worn, but it's still sturdy."
@@ -198,6 +206,7 @@ def create_chest_description(chest):
     elif chest["open"]:
         description += " The chest is open."
     return description
+
 
 def advance_time(room, clock):
     event = None
@@ -210,6 +219,7 @@ def advance_time(room, clock):
     room["description"] = create_room_description(room)
     return event
 
+
 class EscapeRoomGame:
     def __init__(self, command_handler_class=EscapeRoomCommandHandler, output=print):
         self.room, self.player = None, None
@@ -219,28 +229,34 @@ class EscapeRoomGame:
         self.status = "void"
 
     def create_game(self, cheat=False):
-        clock =  EscapeRoomObject("clock",  visible=True, time=100)
+        clock = EscapeRoomObject("clock", visible=True, time=100)
         mirror = EscapeRoomObject("mirror", visible=True)
-        hairpin= EscapeRoomObject("hairpin",visible=False, gettable=True)
-        door  =  EscapeRoomObject("door",   visible=True, openable=True, open=False, keyed=True, locked=True, unlockers=[hairpin])
-        chest  = EscapeRoomObject("chest",  visible=True, openable=True, open=False, keyed=True, locked=True, unlockers=[hairpin])
-        room   = EscapeRoomObject("room",   visible=True)
+        hairpin = EscapeRoomObject("hairpin", visible=False, gettable=True)
+        door = EscapeRoomObject("door", visible=True, openable=True, open=False, keyed=True, locked=True,
+                                unlockers=[hairpin])
+        chest = EscapeRoomObject("chest", visible=True, openable=True, open=False, keyed=True, locked=True,
+                                 unlockers=[hairpin])
+        room = EscapeRoomObject("room", visible=True)
         player = EscapeRoomObject("player", visible=False, alive=True)
 
         # setup containers
-        player["container"]= {}
+        player["container"] = {}
         chest["container"] = {}
-        room["container"]  = create_container_contents(player, door, clock, mirror, hairpin, chest)
+        room["container"] = create_container_contents(player, door, clock, mirror, hairpin, chest)
 
         # set initial descriptions (functions)
-        room["description"]    = create_room_description(room)
-        door["description"]    = create_door_description(door)
-        mirror["description"]  = create_mirror_description(mirror, room)
-        chest["description"]   = create_chest_description(chest)
+        room["description"] = create_room_description(room)
+        door["description"] = create_door_description(door)
+        mirror["description"] = create_mirror_description(mirror, room)
+        chest["description"] = create_chest_description(chest)
 
-        mirror.triggers.append(lambda obj, cmd, *args: (cmd == "look") and hairpin.__setitem__("visible",True))
-        mirror.triggers.append(lambda obj, cmd, *args: (cmd == "look") and mirror.__setitem__("description", create_mirror_description(mirror, room)))
-        door.triggers.append(lambda obj, cmd, *args: (cmd == "unlock") and door.__setitem__("description", create_door_description(door)))
+        mirror.triggers.append(lambda obj, cmd, *args: (cmd == "look") and hairpin.__setitem__("visible", True))
+        mirror.triggers.append(lambda obj, cmd, *args: (cmd == "look") and mirror.__setitem__("description",
+                                                                                              create_mirror_description(
+                                                                                                  mirror, room)))
+        door.triggers.append(lambda obj, cmd, *args: (cmd == "unlock") and door.__setitem__("description",
+                                                                                            create_door_description(
+                                                                                                door)))
         door.triggers.append(lambda obj, cmd, *args: (cmd == "open") and room["container"].__delitem__(player.name))
         room.triggers.append(lambda obj, cmd, *args: (cmd == "_post_command_") and advance_time(room, clock))
         # TODO, the chest needs some triggers. This is for a later exercise
@@ -271,6 +287,7 @@ class EscapeRoomGame:
                 self.output("VICTORY! You escaped!")
                 self.status = "escaped"
 
+
 def main(args):
     # Client test
     s = socket.socket()
@@ -299,7 +316,7 @@ def main(args):
     game.start()
     while game.status == "playing":
         res = s.recv(1024)
-        command = res.decode('utf-8')
+        command = res.decode('utf-8').split("<EOL>\n")
         print(command)
         # command = input(">> ")
         output = game.command(command)
