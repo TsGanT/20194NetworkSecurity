@@ -183,6 +183,7 @@ def create_room_description(room):
     return """You are in a locked room. There is only one door
 and it is locked. Above the door is a clock that reads {clock_time}.
 Across from the door is a large {mirror}. Below the mirror is an old chest.
+
 The room is old and musty and the floor is creaky and warped.""".format(**room_data)
 
 
@@ -320,7 +321,9 @@ def main(args):
         print(command)
         # command = input(">> ")
         for i in command:
-            output = game.command(i)
+            if i != "":
+                print(i)
+                output = game.command(i)
         #  output = game.command(command)
     s.close()
 
