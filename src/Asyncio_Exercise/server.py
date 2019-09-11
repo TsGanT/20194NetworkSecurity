@@ -108,7 +108,7 @@ class EscapeRoomCommandHandler:
         """
         if len(open_args) == 0:
             return self.output("Open what?")
-        object = self.room["container"].get(open_args[-1], None)
+        object = self.room["container"].get(open_args[-1], None)bbb
 
         success_result = "You open the {}.".format(object.name)
         open_result = (
